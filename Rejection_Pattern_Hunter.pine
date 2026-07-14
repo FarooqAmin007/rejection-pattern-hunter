@@ -1,1 +1,70 @@
 //@version=6
+indicator("Rejection Pattern Hunter V0.1", overlay=true)
+
+//====================================================
+// INPUTS
+//====================================================
+
+bodyMaxPct = input.float(20.0, "Max Body %", minval=1, maxval=50)
+mainWickMinPct = input.float(60.0, "Min Main Wick %", minval=20, maxval=95)
+oppWickMaxPct = input.float(20.0, "Max Opposite Wick %", minval=0, maxval=50)
+
+showBull = input.bool(true, "Show Bullish Rejection")
+showBear = input.bool(true, "Show Bearish Rejection")
+
+//====================================================
+// CANDLE DATA
+//====================================================
+
+float r = high - low
+
+float b = math.abs(close - open)
+
+float upper =
+    high - math.max(open, close)
+
+float lower =
+    math.min(open, close) - low
+
+float bodyPct =
+    r > 0 ? (b / r) * 100 : 0
+
+float upperPct =
+    r > 0 ? (upper / r) * 100 : 0
+
+float lowerPct =
+    r > 0 ? (lower / r) * 100 : 0
+
+//====================================================
+// REJECTION ENGINE
+//====================================================
+
+bullReject =
+     bodyPct <= bodyMaxPct and
+     lowerPct >= mainWickMinPct and
+     upperPct <= oppWickMaxPct
+
+bearReject =
+     bodyPct <= bodyMaxPct and
+     upperPct >= mainWickMinPct and
+     lowerPct <= oppWickMaxPct
+
+//====================================================
+// DISPLAY
+//====================================================
+
+plotshape(
+     showBull and bullReject,
+     title="Bull",
+     style=shape.circle,
+     location=location.belowbar,
+     size=size.tiny,
+     color=color.lime)
+
+plotshape(
+     showBear and bearReject,
+     title="Bear",
+     style=shape.circle,
+     location=location.abovebar,
+     size=size.tiny,
+     color=color.red)
